@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "sections": [
+    {
+      "id": "legal",
+      "title": "条款",
+      "icon": "📜",
+      "count": "4项",
+      "items": [
+        {
+          "text": "隐私政策",
+          "url": "/mdr.html?file=/md/隐私政策.md"
+        },
+        {
+          "text": "用户协议",
+          "url": "/mdr.html?file=/md/用户协议.md"
+        },
+        {
+          "text": "免责声明",
+          "url": "/mdr.html?file=/md/免责声明.md"
+        },
+        {
+          "text": "合规性说明",
+          "url": "/mdr.html?file=/md/合规性说明.md"
+        }
+      ]
+    }
+  ]
+}

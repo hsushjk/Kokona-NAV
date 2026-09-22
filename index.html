@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="" id="metaThemeColor">
+
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="preload" as="image" href="bg.webp" fetchpriority="high">
+
+    <title></title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="apple-touch-icon" href="favicon.png">
+
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #2ecc71;
+    --dark-color: #3498db;
+    --light-color: #ecf0f1;
+    --text-color: #333;
+    --text-light: #777;
+    --spacing: 8px;
+    --border-radius: 12px;
+    --transition: all 0.4s ease;
+
+    --acrylic-bg: rgba(255, 255, 255, 0.2);
+    --acrylic-blur: blur(0.5px);
+    --acrylic-border: 1px solid rgba(255, 255, 255, 0.2);
+
+    --status-good: #00FF00;
+    --status-warning: #FFFF00;
+    --status-error: #e74c3c;
+    --status-text: rgba(255, 255, 255, 0.9);
+
+    --card-bg: var(--acrylic-bg);
+    --card-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --card-hover-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+
+    --btn-bg: rgba(255, 255, 255, 0.2);
+    --btn-hover-bg: rgba(255, 255, 255, 0.3);
+    --btn-disabled-bg: rgba(149, 165, 166, 0.5);
+
+    --modal-confirm-bg: rgba(46, 204, 113, 0.3);
+    --modal-confirm-border: rgba(46, 204, 113, 0.5);
+    --modal-cancel-bg: rgba(231, 76, 60, 0.3);
+    --modal-cancel-border: rgba(231, 76, 60, 0.5);
+
+    --update-bg: rgba(0, 0, 0, 0.85);
+    --update-spinner-color: rgba(255, 255, 255, 0.3);
+
+    --accordion-header-bg: rgba(255, 255, 255, 0.1);
+    --accordion-header-hover: rgba(255, 255, 255, 0.15);
+    --accordion-content-bg: rgba(0, 0, 0, 0.1);
+    --accordion-border: rgba(255, 255, 255, 0.15);
+}
+
+body {
+    line-height: 1.6;
+    color: white;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.acrylic-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background-size: cover;
+    background-position: center;
+    z-index: -2;
+}
+
+.acrylic-bg::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('bg.webp');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.acrylic-bg.loaded::after {
+    opacity: 1;
+}
+
+.acrylic-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: var(--acrylic-blur);
+    z-index: -1;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing);
+}
+
+header {
+    background: var(--acrylic-bg);
+    color: white;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    backdrop-filter: var(--acrylic-blur);
+    border-bottom: var(--acrylic-border);
+}
+
+.main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.status-container {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    min-width: 140px;
+    height: 40px;
+    box-sizing: border-box;
+    backdrop-filter: var(--acrylic-blur);
+    border: var(--acrylic-border);
+}
+
+.status-indicator {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.status-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.status-text-container {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.status-text {
+    font-size: 0.9rem;
+    color: white;
+    margin-right: 0.5rem;
+    white-space: nowrap;
+}
+
+.response-time {
+    font-size: 0.8rem;
+    color: #ddd;
+    white-space: nowrap;
+}
+
+h1, h2, h3, h4 {
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    color: white;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin-top: 1.5rem;
+}
+
+p {
+    margin-bottom: 1rem;
+    color: var(--status-text);
+}
+
+.block-wrapper {
+    position: relative;
+    margin: 2rem 0;
+}
+
+.block-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    border-radius: var(--border-radius);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.block-mask.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.block-mask-text {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.card {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    padding: 1.5rem;
+    margin-bottom: 0rem;
+    transition: var(--transition);
+    overflow: hidden;
+    backdrop-filter: var(--acrylic-blur);
+    border: var(--acrylic-border);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.card-header h2 {
+    margin-top: 0;
+    color: white;
+}
+
+.card-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.card-mask.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.card-mask-text {
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 0 10px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: var(--btn-bg);
+    color: white;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 1rem;
+    text-decoration: none;
+    backdrop-filter: var(--acrylic-blur);
+    border: var(--acrylic-border);
+}
+
+.btn:hover {
+    background: var(--btn-hover-bg);
+    transform: translateY(-2px);
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn:disabled {
+    background: var(--btn-disabled-bg);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.accordion {
+    margin-top: 2rem;
+}
+
+.accordion-header {
+    background: var(--accordion-header-bg);
+    border: 1px solid var(--accordion-border);
+    border-radius: var(--border-radius);
+    padding: 1.2rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
+    backdrop-filter: var(--acrylic-blur);
+}
+
+.accordion-header:hover {
+    background: var(--accordion-header-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.accordion-header.active {
+    background: rgba(52, 152, 219, 0.2);
+    border-color: rgba(52, 152, 219, 0.4);
+}
+
+.accordion-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+}
+
+.accordion-icon {
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+.accordion-header.active .accordion-icon {
+    transform: rotate(90deg);
+}
+
+.accordion-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: white;
+}
+
+.accordion-content {
+    background: var(--accordion-content-bg);
+    border: 1px solid var(--accordion-border);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    backdrop-filter: var(--acrylic-blur);
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    border-top: none;
+}
+
+.accordion-content.active {
+    padding: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.accordion-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.accordion-links li {
+    margin-bottom: 0.8rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.accordion-links li:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.accordion-links a {
+    color: #4fc3f7;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.accordion-links a:hover {
+    color: #29b6f6;
+    text-decoration: underline;
+    padding-left: 1rem;
+}
+
+.accordion-links a::before {
+    content: '→';
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.accordion-item {
+    position: relative;
+}
+
+.accordion-header {
+    position: relative;
+    overflow: hidden;
+}
+
+.accordion-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #3498db, #2ecc71);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.accordion-header:hover::before,
+.accordion-header.active::before {
+    opacity: 1;
+}
+
+.accordion-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 1rem;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+.accordion-header:hover .accordion-icon {
+    background: rgba(52, 152, 219, 0.22);
+    transform: scale(1.06);
+}
+
+.accordion-header.active .accordion-icon {
+    background: rgba(46, 204, 113, 0.22);
+}
+
+.accordion-count {
+    background: linear-gradient(135deg,
+        rgba(52, 152, 219, 0.28),
+        rgba(46, 204, 113, 0.28));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 0.25rem 0.7rem;
+}
+
+.accordion-content.active {
+    padding: 0.6rem;
+    max-height: 600px;
+}
+
+.accordion-links li {
+    margin-bottom: 0.5rem;
+    padding: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    overflow: hidden;
+    transition: all 0.25s ease;
+}
+
+.accordion-links li:last-child {
+    margin-bottom: 0;
+}
+
+.accordion-links li:hover {
+    background: rgba(52, 152, 219, 0.12);
+    transform: translateX(4px);
+}
+
+.accordion-links a {
+    color: #cbd5e1;
+    padding: 0.7rem 0.9rem;
+    border-radius: 8px;
+    position: relative;
+    transition: all 0.25s ease;
+}
+
+.accordion-links a::before {
+    content: '→';
+    color: #3498db;
+    transition: all 0.25s ease;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.accordion-links a:hover {
+    color: #ffffff;
+    padding-left: 1.2rem;
+    text-decoration: none;
+    background: transparent;
+}
+
+.accordion-links a:hover::before {
+    color: #2ecc71;
+    transform: translateX(2px);
+}
+
+@media (max-width: 1024px) and (orientation: portrait) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.install-prompt {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(46, 204, 113, 0.3);
+    color: white;
+    border: 1px solid rgba(46, 204, 113, 0.5);
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: none;
+    backdrop-filter: blur(10px);
+}
+
+.install-prompt:hover {
+    background: rgba(46, 204, 113, 0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(46, 204, 113, 0.4);
+}
+
+.update-loading {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(20, 20, 40, 0.9);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    padding: 16px 20px;
+    color: white;
+    z-index: 10000;
+    width: auto;
+    min-width: 280px;
+    max-width: 340px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    display: none;
+    transition: opacity 0.3s ease;
+}
+
+.update-loading.show {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.update-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--update-spinner-color);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1.5s infinite linear;
+    flex-shrink: 0;
+}
+
+.update-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.update-subtext {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    color: #ddd;
+}
+
+.first-visit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--update-bg);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    backdrop-filter: blur(5px);
+}
+
+.first-visit-modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    border: var(--acrylic-border);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.markdown-body {
+    color: #e2e8f0;
+    line-height: 1.7;
+    font-size: 0.98rem;
+    word-wrap: break-word;
+}
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+    color: #ffffff;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+.markdown-body h1 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    padding-bottom: 4px;
+}
+.markdown-body h2 {
+    font-size: 1.3rem;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    padding-bottom: 4px;
+}
+.markdown-body h3 { font-size: 1.15rem; }
+.markdown-body h4 { font-size: 1.05rem; }
+.markdown-body h5 { font-size: 1rem;    }
+.markdown-body h6 { font-size: 0.95rem; color: #cbd5e1; }
+
+.markdown-body h1:first-child,
+.markdown-body h2:first-child,
+.markdown-body h3:first-child {
+    margin-top: 0;
+}
+
+.markdown-body p { margin-bottom: 1rem; color: rgba(255,255,255,0.85); }
+.markdown-body p:last-child { margin-bottom: 0; }
+
+.markdown-body a {
+    color: #3498db;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.markdown-body a:hover { color: #2ecc71; }
+
+.markdown-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 0.5rem 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.markdown-body code {
+    background: rgba(255,255,255,0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: SFMono-Regular, Consolas, monospace;
+    font-size: 0.9rem;
+    color: #f59e0b;
+}
+
+.markdown-body pre {
+    background: rgba(0,0,0,0.4);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.markdown-body pre code {
+    background: transparent;
+    padding: 0;
+    color: #e2e8f0;
+    display: block;
+    white-space: pre;
+}
+
+.markdown-body blockquote {
+    border-left: 4px solid #3498db;
+    background: rgba(52,152,219,0.1);
+    padding: 0.6rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0 6px 6px 0;
+    font-style: italic;
+}
+.markdown-body blockquote p { margin-bottom: 0.4rem; }
+.markdown-body blockquote p:last-child { margin-bottom: 0; }
+.markdown-body blockquote blockquote {
+    margin: 0.6rem 0;
+    border-left-color: #2ecc71;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+.markdown-body li { margin-bottom: 0.4rem; }
+.markdown-body li > ul,
+.markdown-body li > ol {
+    margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
+}
+
+.markdown-body hr {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    margin: 1.5rem 0;
+}
+
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.92rem;
+}
+.markdown-body table th,
+.markdown-body table td {
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 6px 10px;
+    text-align: left;
+}
+.markdown-body table th {
+    background: rgba(255,255,255,0.08);
+    font-weight: 600;
+}
+.markdown-body table tr:nth-child(2n) {
+    background: rgba(255,255,255,0.03);
+}
+
+.markdown-body del {
+    color: #94a3b8;
+    text-decoration: line-through;
+}
+.markdown-body strong { color: #ffffff; }
+.markdown-body em { color: #f1f5f9; }
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.modal-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: bold;
+    min-width: 120px;
+}
+
+.modal-btn.confirm {
+    background: var(--modal-confirm-bg);
+    color: white;
+    border: 1px solid var(--modal-confirm-border);
+}
+
+.modal-btn.confirm:hover {
+    background: rgba(46, 204, 113, 0.5);
+    transform: translateY(-2px);
+}
+
+.modal-btn.cancel {
+    background: var(--modal-cancel-bg);
+    color: white;
+    border: 1px solid var(--modal-cancel-border);
+}
+
+.debug-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--border-radius);
+    color: white;
+    font-size: 1rem;
+    margin-top: 1rem;
+    outline: none;
+}
+
+footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--status-text);
+    font-size: 0.9rem;
+}
+
+.footer-copyright {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 25px;
+    display: inline-block;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s;
+}
+
+.footer-copyright:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.02);
+}
+
+.debug-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--update-bg);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1005;
+    backdrop-filter: blur(5px);
+}
+.debug-modal.show {
+    display: flex;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+
+    <div class="update-loading" id="updateLoading">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="update-spinner"></div>
+            <div class="update-text" id="updateText">正在检查更新...</div>
+        </div>
+        <div class="update-subtext" id="updateSubtext">正在与服务器通信，请稍候</div>
+    </div>
+
+    <div class="first-visit-modal" id="firstVisitModal">
+        <div class="modal-content">
+            <h2>First-time Visit Wizard</h2>
+            <div id="firstVisitMarkdownBody" class="markdown-body" style="margin-top:1rem;">正在下载内容...</div>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm" id="confirmBtn">已阅并理解</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-modal" id="debugModal">
+        <div class="modal-content" style="text-align: center;">
+            <h2>调试</h2>
+            <input type="text" id="debugInput" class="debug-input" placeholder="请输入URL参数或端点...">
+            <div class="modal-buttons">
+                <button class="modal-btn confirm" id="debugConfirmBtn">确认</button>
+                <button class="modal-btn cancel" id="debugCancelBtn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="first-visit-modal" id="noticeModal">
+        <div class="modal-content" style="text-align: center;">
+            <h2>系统通知</h2>
+            <div id="noticeDetail" class="markdown-body" style="margin-top: 1rem; text-align: left;">正在加载通知...</div>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm" id="noticeConfirmBtn">已阅</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="acrylic-bg"></div>
+    <div class="acrylic-overlay"></div>
+
+    <button id="installButton" class="install-prompt" aria-label="安装PWA应用到设备">
+        🪄 安装PWA
+    </button>
+
+    <header>
+        <div class="container">
+            <nav class="main-nav">
+                <div class="logo" id="brandLogo"></div>
+                <div class="status-container" role="status">
+                    <div class="status-indicator" id="statusIndicator">🫥</div>
+                    <div class="status-details">
+                        <div class="status-text-container">
+                            <div class="status-text" id="statusText">等待响应...</div>
+                            <div class="response-time" id="responseTime"></div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="block-wrapper" id="appCardsWrapper">
+            <section aria-labelledby="main-title" id="appCardsSection">
+                <h1 id="main-title"></h1>
+                <div class="grid" id="appCardsGrid" role="list">
+                </div>
+            </section>
+        </div>
+
+        <div class="block-wrapper" id="accordionWrapper">
+            <div class="block-mask" id="accordionBlockMask">
+                <div class="update-spinner"></div>
+                <div class="block-mask-text">正在检查区块更新...</div>
+            </div>
+            <section aria-labelledby="documents-title" class="accordion" id="accordionSection">
+                <h2 id="documents-title">More:</h2>
+                <div id="accordionContainer">
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer id="pageFooter">
+        <div class="container">
+            <div class="footer-content">
+                <p><span id="current-ip">检测中...</span></p>
+                <div class="footer-copyright" id="copyrightClickable"></div>
+            </div>
+        </div>
+    </footer>
+
+<script>
+    // ============================================================
+    // 站点配置加载器
+    // 从同目录 site.config.json 读取品牌文案、主题色等
+    // 读不到就保持空白，绝不硬编码品牌名
+    // ============================================================
+    class SiteConfigLoader {
+        constructor() {
+            this.config = {
+                siteName: '',
+                logoText: '',
+                title: '',
+                copyright: '',
+                themeColor: ''
+            };
+        }
+
+        async load() {
+            try {
+                const r = await fetch(`site.config.json?t=${Date.now()}`, { cache: 'no-store' });
+                if (r.ok) {
+                    const data = await r.json();
+                    for (const key of Object.keys(this.config)) {
+                        if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
+                            this.config[key] = data[key];
+                        }
+                    }
+                }
+            } catch (e) {
+                // 没有配置文件 / 在本地直接打开时，保持空白
+            }
+            this.apply();
+        }
+
+        apply() {
+            const c = this.config;
+
+            if (c.title) document.title = c.title;
+
+            const h1 = document.getElementById('main-title');
+            if (h1 && c.siteName) h1.textContent = c.siteName;
+
+            const logo = document.getElementById('brandLogo');
+            if (logo && c.logoText) logo.textContent = c.logoText;
+
+            const copyright = document.getElementById('copyrightClickable');
+            if (copyright && c.copyright) copyright.textContent = c.copyright;
+
+            const metaTheme = document.getElementById('metaThemeColor');
+            if (metaTheme && c.themeColor) {
+                metaTheme.setAttribute('content', c.themeColor);
+            }
+        }
+    }
+
+    const CookieUtil = {
+        get(name) {
+            const cookieName = `${encodeURIComponent(name)}=`;
+            const cookieStart = document.cookie.indexOf(cookieName);
+            let cookieValue = null;
+            if (cookieStart > -1) {
+                let cookieEnd = document.cookie.indexOf(';', cookieStart);
+                if (cookieEnd === -1) cookieEnd = document.cookie.length;
+                cookieValue = decodeURIComponent(document.cookie.substring(cookieStart + cookieName.length, cookieEnd));
+            }
+            return cookieValue;
+        },
+        set(name, value, days = 365, sameSite = 'Lax') {
+            let expires = '';
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = `; expires=${date.toUTCString()}`;
+            }
+            document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}${expires}; path=/${sameSite ? `; SameSite=${sameSite}` : ''}`;
+        }
+    };
+
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    function preloadBackground(url, timeoutMs = 3000) {
+        const bgEl = document.querySelector('.acrylic-bg');
+        if (!bgEl) return Promise.resolve();
+
+        const imgPromise = new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+        });
+
+        return Promise.race([imgPromise, sleep(timeoutMs)]).then(() => {
+            bgEl.classList.add('loaded');
+        });
+    }
+
+    // 与 sha256sum 完全一致的哈希算法：对原始字节做 SHA-256
+    async function sha256OfBuffer(buffer) {
+        const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+        return Array.from(new Uint8Array(hashBuffer))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
+    }
+
+    class BeautifulMarkdownParser {
+        escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        parseInline(text) {
+            if (!text) return '';
+            let t = this.escapeHtml(text);
+
+            t = t.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+
+            t = t.replace(
+                /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,
+                (_, alt, src, title) =>
+                    '<img src="' + src + '" alt="' + alt + '"' +
+                    (title ? ' title="' + title + '"' : '') + '>'
+            );
+
+            t = t.replace(
+                /\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,
+                (_, txt, href, title) =>
+                    '<a href="' + href + '" target="_blank" rel="noopener"' +
+                    (title ? ' title="' + title + '"' : '') + '>' + txt + '</a>'
+            );
+
+            t = t.replace(/\*\*\*([^*\n]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+            t = t.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+            t = t.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+
+            t = t.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+            t = t.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+
+            t = t.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
+
+            t = t.replace(/ {2,}$/g, '<br>');
+
+            return t;
+        }
+
+        isTableSeparator(line) {
+            if (!line) return false;
+            const t = line.trim();
+            if (t.indexOf('|') === -1) return false;
+            if (t.indexOf('-') === -1) return false;
+            return /^[\|\s:\-]+$/.test(t);
+        }
+
+        splitTableRow(line) {
+            let t = line.trim();
+            if (t.charAt(0) === '|') t = t.slice(1);
+            if (t.charAt(t.length - 1) === '|') t = t.slice(0, -1);
+            return t.split('|').map(c => c.trim());
+        }
+
+        parseTableAlign(line) {
+            return this.splitTableRow(line).map(cell => {
+                const left = cell.charAt(0) === ':';
+                const right = cell.charAt(cell.length - 1) === ':';
+                if (left && right) return 'center';
+                if (right) return 'right';
+                return 'left';
+            });
+        }
+
+        parse(input) {
+            if (!input) return '';
+            const text = String(input).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            const lines = text.split('\n');
+            const out = [];
+            let i = 0;
+
+            while (i < lines.length) {
+                const line = lines[i];
+                const trimmed = line.trim();
+
+                if (trimmed === '') { i++; continue; }
+
+                if (/^```/.test(trimmed)) {
+                    const lang = trimmed.replace(/^```/, '').trim();
+                    const codeLines = [];
+                    i++;
+                    while (i < lines.length && !/^```/.test(lines[i].trim())) {
+                        codeLines.push(lines[i]);
+                        i++;
+                    }
+                    if (i < lines.length) i++;
+                    const codeHtml = this.escapeHtml(codeLines.join('\n'));
+                    out.push('<pre><code' +
+                             (lang ? ' class="language-' + this.escapeHtml(lang) + '"' : '') +
+                             '>' + codeHtml + '</code></pre>');
+                    continue;
+                }
+
+                if (/^(?:-{3,}|_{3,}|\*{3,})\s*$/.test(trimmed)) {
+                    out.push('<hr>');
+                    i++;
+                    continue;
+                }
+
+                const headingMatch = line.match(/^(#{1,6})\s+(.+?)\s*#*\s*$/);
+                if (headingMatch) {
+                    const level = headingMatch[1].length;
+                    out.push('<h' + level + '>' + this.parseInline(headingMatch[2]) + '</h' + level + '>');
+                    i++;
+                    continue;
+                }
+
+                if (line.indexOf('|') !== -1 &&
+                    i + 1 < lines.length &&
+                    this.isTableSeparator(lines[i + 1])) {
+                    const headerCells = this.splitTableRow(line);
+                    const aligns = this.parseTableAlign(lines[i + 1]);
+                    i += 2;
+                    const rows = [];
+                    while (i < lines.length &&
+                           lines[i].indexOf('|') !== -1 &&
+                           lines[i].trim() !== '') {
+                        rows.push(this.splitTableRow(lines[i]));
+                        i++;
+                    }
+                    let t = '<table>\n<thead>\n<tr>\n';
+                    headerCells.forEach((cell, idx) => {
+                        t += '<th style="text-align:' + (aligns[idx] || 'left') + '">' +
+                             this.parseInline(cell) + '</th>\n';
+                    });
+                    t += '</tr>\n</thead>\n<tbody>\n';
+                    rows.forEach(row => {
+                        t += '<tr>\n';
+                        row.forEach((cell, idx) => {
+                            t += '<td style="text-align:' + (aligns[idx] || 'left') + '">' +
+                                 this.parseInline(cell) + '</td>\n';
+                        });
+                        t += '</tr>\n';
+                    });
+                    t += '</tbody>\n</table>';
+                    out.push(t);
+                    continue;
+                }
+
+                if (/^>\s?/.test(line)) {
+                    const quoteLines = [];
+                    while (i < lines.length && /^>\s?/.test(lines[i])) {
+                        quoteLines.push(lines[i].replace(/^>\s?/, ''));
+                        i++;
+                    }
+                    out.push('<blockquote>' + this.parse(quoteLines.join('\n')) + '</blockquote>');
+                    continue;
+                }
+
+                if (/^[-*+]\s+/.test(line)) {
+                    const items = [];
+                    while (i < lines.length && /^[-*+]\s+/.test(lines[i])) {
+                        items.push('<li>' + this.parseInline(lines[i].replace(/^[-*+]\s+/, '')) + '</li>');
+                        i++;
+                    }
+                    out.push('<ul>\n' + items.join('\n') + '\n</ul>');
+                    continue;
+                }
+
+                if (/^\d+\.\s+/.test(line)) {
+                    const items = [];
+                    while (i < lines.length && /^\d+\.\s+/.test(lines[i])) {
+                        items.push('<li>' + this.parseInline(lines[i].replace(/^\d+\.\s+/, '')) + '</li>');
+                        i++;
+                    }
+                    out.push('<ol>\n' + items.join('\n') + '\n</ol>');
+                    continue;
+                }
+
+                const paraLines = [];
+                while (i < lines.length) {
+                    const cur = lines[i];
+                    const curTrim = cur.trim();
+                    if (curTrim === '') break;
+                    if (/^```/.test(curTrim)) break;
+                    if (/^#{1,6}\s+/.test(cur)) break;
+                    if (/^>\s?/.test(cur)) break;
+                    if (/^[-*+]\s+/.test(cur)) break;
+                    if (/^\d+\.\s+/.test(cur)) break;
+                    if (/^(?:-{3,}|_{3,}|\*{3,})\s*$/.test(curTrim)) break;
+                    if (i + 1 < lines.length &&
+                        cur.indexOf('|') !== -1 &&
+                        this.isTableSeparator(lines[i + 1])) break;
+                    paraLines.push(cur);
+                    i++;
+                }
+                if (paraLines.length === 0) { i++; continue; }
+
+                const paraHtml = paraLines
+                    .map(l => this.parseInline(l))
+                    .join('<br>');
+                out.push('<p>' + paraHtml + '</p>');
+            }
+
+            return out.join('\n');
+        }
+    }
+
+    class PwaInstallManager {
+        constructor() {
+            this.deferredPrompt = null;
+            this.installButton = document.getElementById('installButton');
+            this.init();
+        }
+        init() {
+            if (!this.installButton) return;
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                this.deferredPrompt = e;
+                this.installButton.style.display = 'block';
+            });
+
+            this.installButton.addEventListener('click', async () => {
+                if (!this.deferredPrompt) return;
+                this.deferredPrompt.prompt();
+                const { outcome } = await this.deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('用户接受安装 PWA');
+                }
+                this.deferredPrompt = null;
+                this.installButton.style.display = 'none';
+            });
+
+            window.addEventListener('appinstalled', () => {
+                this.deferredPrompt = null;
+                this.installButton.style.display = 'none';
+            });
+        }
+    }
+
+    class ConfigLoader {
+        constructor() {
+            this.cache = {};
+        }
+
+        async loadConfig(filename, forceRefresh = false) {
+            const cacheKey = filename;
+            if (!forceRefresh && this.cache[cacheKey]) return this.cache[cacheKey];
+            try {
+                const timestamp = forceRefresh ? `?t=${Date.now()}` : '';
+                const response = await fetch(`${cacheKey}${timestamp}`, {
+                    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const config = await response.json();
+                this.cache[cacheKey] = config;
+                return config;
+            } catch (error) {
+                console.error(`加载JSON失败: ${filename}`, error);
+                throw error;
+            }
+        }
+
+        setAllMasksState(show, text = '') {
+            const cards = document.querySelectorAll('#appCardsGrid .card');
+            cards.forEach(card => {
+                let mask = card.querySelector('.card-mask');
+                if (!mask && show) {
+                    mask = document.createElement('div');
+                    mask.className = 'card-mask';
+                    mask.innerHTML = `<div class="update-spinner" style="width:20px;height:20px;border-width:2px;"></div><div class="card-mask-text"></div>`;
+                    card.appendChild(mask);
+                }
+                if (mask) {
+                    const textEl = mask.querySelector('.card-mask-text');
+                    if (textEl) textEl.textContent = text;
+                    if (show) mask.classList.add('show');
+                    else mask.classList.remove('show');
+                }
+            });
+
+            const accordionMask = document.getElementById('accordionBlockMask');
+            if (accordionMask) {
+                const textEl = accordionMask.querySelector('.block-mask-text');
+                if (textEl) textEl.textContent = text;
+                if (show) accordionMask.classList.add('show');
+                else accordionMask.classList.remove('show');
+            }
+        }
+
+        async checkAutoUpdate() {
+            const updateLoading = document.getElementById('updateLoading');
+
+            if (updateLoading) updateLoading.classList.add('show');
+            this.setAllMasksState(true, '正在检查配置更新...');
+
+            await sleep(1500);
+
+            try {
+                const localAppBuf = await this.fetchRawBytes('cardjson/appcards.json');
+                const localOtherBuf = await this.fetchRawBytes('cardjson/othercards.json');
+                const serverAppSha = (await this.fetchRawText('mark/appcards.mark', true)).trim();
+                const serverOtherSha = (await this.fetchRawText('mark/othercards.mark', true)).trim();
+
+                // 任一文件缺失就跳过更新检查，防止无限刷新
+                if (!localAppBuf || !localOtherBuf || !serverAppSha || !serverOtherSha) {
+                    if (updateLoading) updateLoading.classList.remove('show');
+                    this.setAllMasksState(false);
+                    return;
+                }
+
+                const localAppSha = await sha256OfBuffer(localAppBuf);
+                const localOtherSha = await sha256OfBuffer(localOtherBuf);
+
+                if (localAppSha !== serverAppSha || localOtherSha !== serverOtherSha) {
+
+                    document.getElementById('updateText').textContent = '发现新版本，正在同步资源...';
+                    this.setAllMasksState(true, '发现配置变更，正在同步拉取...');
+                    await sleep(1500);
+
+                    await this.loadConfig('cardjson/appcards.json', true);
+                    await this.loadConfig('cardjson/othercards.json', true);
+
+                    document.getElementById('updateText').textContent = '重构成功，正在热重启页面...';
+                    this.setAllMasksState(true, '同步完成，正在热重启页面...');
+                    await sleep(1500);
+
+                    window.location.reload();
+                } else {
+                    if (updateLoading) updateLoading.classList.remove('show');
+                    this.setAllMasksState(false);
+                }
+            } catch (err) {
+                console.error('配置自动升级流程执行异常:', err);
+                if (updateLoading) updateLoading.classList.remove('show');
+                this.setAllMasksState(false);
+            }
+        }
+
+        async fetchRawBytes(url, force = false) {
+            const finalUrl = url + (force ? `?t=${Date.now()}` : '');
+            const resp = await fetch(finalUrl, { cache: force ? 'no-store' : 'default' });
+            if (!resp.ok) return null;
+            return await resp.arrayBuffer();
+        }
+
+        async fetchRawText(url, force = false) {
+            const finalUrl = url + (force ? `?t=${Date.now()}` : '');
+            const resp = await fetch(finalUrl, { cache: force ? 'no-store' : 'default' });
+            if (!resp.ok) return '';
+            return await resp.text();
+        }
+    }
+
+    class AppCardsRenderer {
+        constructor(configLoader, linkManager) {
+            this.configLoader = configLoader;
+            this.linkManager = linkManager;
+            this.gridElement = document.getElementById('appCardsGrid');
+        }
+
+        async render() {
+            try {
+                if (this.gridElement) this.gridElement.innerHTML = '';
+                const config = await this.configLoader.loadConfig('cardjson/appcards.json');
+                if (!config || !Array.isArray(config.cards)) return;
+                config.cards.forEach(cardConfig => {
+                    const cardElement = this.createCardElement(cardConfig);
+                    if (cardElement) this.gridElement.appendChild(cardElement);
+                });
+            } catch (error) {
+                this.renderError('渲染应用数据异常');
+            }
+        }
+
+        createCardElement(cardConfig) {
+            const article = document.createElement('article');
+            article.className = 'card';
+            if (cardConfig.id) article.id = cardConfig.id;
+
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'card-header';
+            const title = document.createElement('h2');
+            title.textContent = cardConfig.title || '';
+            cardHeader.appendChild(title);
+
+            const description = document.createElement('p');
+            description.innerHTML = cardConfig.description
+                ? String(cardConfig.description).replace(/\n/g, '<br>')
+                : '';
+
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'btn-group';
+
+            if (Array.isArray(cardConfig.links)) {
+                cardConfig.links.forEach(linkConfig => {
+                    if (linkConfig.disabled) {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn';
+                        btn.disabled = true;
+                        btn.textContent = linkConfig.text || '';
+                        btnGroup.appendChild(btn);
+                    } else {
+                        const link = document.createElement('a');
+                        link.className = 'btn';
+                        link.textContent = linkConfig.text || '';
+                        const host = this.linkManager.hostname;
+                        let href = '#';
+                        if (linkConfig.template) {
+                            href = String(linkConfig.template).replace('{host}', host);
+                        } else if (linkConfig.url) {
+                            href = linkConfig.url;
+                        }
+                        link.setAttribute('href', href);
+                        btnGroup.appendChild(link);
+                    }
+                });
+            }
+
+            article.appendChild(cardHeader);
+            article.appendChild(description);
+            article.appendChild(btnGroup);
+            return article;
+        }
+
+        renderError(msg) {
+            if (this.gridElement) {
+                this.gridElement.innerHTML = `<div class="card" style="grid-column:1/-1;"><p>⚠️ ${msg}</p></div>`;
+            }
+        }
+    }
+
+    class AccordionRenderer {
+        constructor(configLoader) {
+            this.configLoader = configLoader;
+            this.containerElement = document.getElementById('accordionContainer');
+        }
+
+        async render() {
+            try {
+                if (this.containerElement) this.containerElement.innerHTML = '';
+                const config = await this.configLoader.loadConfig('cardjson/othercards.json');
+                if (!config || !Array.isArray(config.sections)) return;
+                config.sections.forEach(sectionConfig => {
+                    const item = document.createElement('div');
+                    item.className = 'accordion-item';
+
+                    const header = document.createElement('div');
+                    header.className = 'accordion-header';
+                    header.setAttribute('data-target', sectionConfig.id);
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'accordion-title';
+
+                    const icon = document.createElement('span');
+                    icon.className = 'accordion-icon';
+                    icon.textContent = sectionConfig.icon || '📄';
+
+                    titleDiv.appendChild(icon);
+                    titleDiv.appendChild(document.createTextNode(sectionConfig.title || ''));
+
+                    const countDiv = document.createElement('div');
+                    countDiv.className = 'accordion-count';
+                    countDiv.textContent = sectionConfig.count ||
+                        `${(sectionConfig.items || []).length}项`;
+
+                    header.appendChild(titleDiv);
+                    header.appendChild(countDiv);
+
+                    const content = document.createElement('div');
+                    content.className = 'accordion-content';
+                    content.id = sectionConfig.id;
+
+                    const ul = document.createElement('ul');
+                    ul.className = 'accordion-links';
+
+                    (sectionConfig.items || []).forEach(it => {
+                        const li = document.createElement('li');
+                        const a = document.createElement('a');
+                        a.setAttribute('href', it.url || '#');
+                        a.textContent = it.text || '';
+                        li.appendChild(a);
+                        ul.appendChild(li);
+                    });
+
+                    content.appendChild(ul);
+                    item.appendChild(header);
+                    item.appendChild(content);
+                    this.containerElement.appendChild(item);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }
+
+    class AccordionManager {
+        constructor() {
+            document.addEventListener('click', (e) => {
+                const header = e.target.closest('.accordion-header');
+                if (header) {
+                    const targetId = header.getAttribute('data-target');
+                    const content = document.getElementById(targetId);
+                    if (!content) return;
+                    const isActive = content.classList.contains('active');
+                    document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
+                    document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
+                    if (!isActive) {
+                        content.classList.add('active');
+                        header.classList.add('active');
+                    }
+                }
+            });
+        }
+    }
+
+    class NoticeManager {
+        constructor() {
+            this.modal = document.getElementById('noticeModal');
+            this.confirmBtn = document.getElementById('noticeConfirmBtn');
+            this.noticeDetail = document.getElementById('noticeDetail');
+            this.parser = new BeautifulMarkdownParser();
+            if (this.confirmBtn) this.confirmBtn.addEventListener('click', () => this.modal.classList.remove('show'));
+            setTimeout(() => this.checkNotice(), 2000);
+        }
+
+        async checkNotice() {
+            if (document.getElementById('firstVisitModal').classList.contains('show')) return;
+            try {
+                const resp = await fetch(`mark/notice.mark?t=${Date.now()}`, { cache: 'no-store' });
+                if (!resp.ok) return;
+                const serverHash = (await resp.text()).trim();
+                if (!serverHash) return;
+
+                const localHash = CookieUtil.get('notice_hash') || '';
+                if (serverHash === localHash) return;
+
+                const cResp = await fetch(`notice.md?t=${Date.now()}`, { cache: 'no-store' });
+                if (!cResp.ok) return;
+                const mdText = await cResp.text();
+
+                this.noticeDetail.innerHTML = this.parser.parse(mdText);
+                this.modal.classList.add('show');
+                CookieUtil.set('notice_hash', serverHash, 365);
+            } catch (e) {
+                console.warn('[Notice] 检查失败', e);
+            }
+        }
+    }
+
+    class LinkManager {
+        constructor() {
+            this.hostname = window.location.hostname;
+            this.debugModal = document.getElementById('debugModal');
+            this.debugInput = document.getElementById('debugInput');
+        }
+
+        init() {
+            document.getElementById('current-ip').textContent = this.hostname;
+            document.getElementById('copyrightClickable').addEventListener('click', () => {
+                this.debugInput.value = '';
+                this.debugModal.classList.add('show');
+                this.debugInput.focus();
+            });
+            document.getElementById('debugCancelBtn').addEventListener('click', () => this.debugModal.classList.remove('show'));
+            document.getElementById('debugConfirmBtn').addEventListener('click', () => {
+                const val = this.debugInput.value.trim();
+                if (val) {
+                    this.debugModal.classList.remove('show');
+                    window.location.href = `https://${this.hostname}/${val}`;
+                }
+            });
+        }
+    }
+
+    class FirstVisitModal {
+        constructor() {
+            this.modal = document.getElementById('firstVisitModal');
+            this.confirmBtn = document.getElementById('confirmBtn');
+            this.markdownBody = document.getElementById('firstVisitMarkdownBody');
+            this.parser = new BeautifulMarkdownParser();
+            if (!CookieUtil.get('first_visit_acknowledged')) setTimeout(() => this.showModal(), 1000);
+            if (this.confirmBtn) this.confirmBtn.addEventListener('click', () => this.handleConfirm());
+        }
+
+        async showModal() {
+            if (!this.modal) return;
+            try {
+                const r = await fetch(`first-time.md?t=${Date.now()}`);
+                if (!r.ok) return;
+                const text = await r.text();
+                if (!text.trim()) return;
+                this.markdownBody.innerHTML = this.parser.parse(text);
+                this.modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } catch (e) {
+                // 本地直接打开 / 无网络时不弹窗
+            }
+        }
+
+        handleConfirm() {
+            CookieUtil.set('first_visit_acknowledged', 'true', 365);
+            this.modal.classList.remove('show');
+            document.body.style.overflow = '';
+            const f = document.getElementById('pageFooter');
+            if (f) {
+                f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }
+
+    class OptimizedNetworkChecker {
+        constructor() {
+            this.indicator = document.getElementById('statusIndicator');
+            this.statusText = document.getElementById('statusText');
+            this.responseTimeEl = document.getElementById('responseTime');
+        }
+
+        async checkStatus() {
+            const start = performance.now();
+            try {
+                const r = await fetch(`network-test.json?_t=${Date.now()}`, { cache: 'no-store' });
+                const d = Math.round(performance.now() - start);
+                if (r.ok) {
+                    this.indicator.textContent = '🟢';
+                    this.indicator.style.color = 'var(--status-good)';
+                    this.statusText.textContent = '在线';
+                    this.responseTimeEl.textContent = `${d}ms`;
+                } else {
+                    this.setOffline();
+                }
+            } catch (e) {
+                this.setOffline();
+            }
+        }
+
+        setOffline() {
+            this.indicator.textContent = '🔴';
+            this.indicator.style.color = 'var(--status-error)';
+            this.statusText.textContent = '离线';
+            this.responseTimeEl.textContent = '';
+        }
+
+        start() {
+            this.checkStatus();
+            setInterval(() => this.checkStatus(), 5000);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const siteConfig = new SiteConfigLoader();
+        await siteConfig.load();
+
+        await preloadBackground('bg.webp', 3000);
+
+        const configLoader = new ConfigLoader();
+        const linkManager = new LinkManager();
+        linkManager.init();
+
+        new PwaInstallManager();
+
+        const appCardsRenderer = new AppCardsRenderer(configLoader, linkManager);
+        const accordionRenderer = new AccordionRenderer(configLoader);
+        new AccordionManager();
+        new FirstVisitModal();
+        new NoticeManager();
+
+        new OptimizedNetworkChecker().start();
+
+        await appCardsRenderer.render();
+        await accordionRenderer.render();
+
+        await configLoader.checkAutoUpdate();
+    });
+
+    // 注册 Service Worker（sw.js 由 build.sh 生成）
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => {
+                console.warn('[SW] 注册失败（如果尚未生成 sw.js 可忽略）', err);
+            });
+        });
+    }
+</script>
+</body>
+</html>

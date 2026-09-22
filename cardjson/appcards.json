@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "cards": [
+    {
+      "id": "card_kokona",
+      "title": "Kokonademo",
+      "description": "demo\n*demodemodemo",
+      "links": [
+        {
+          "text": "进入",
+          "template": "https://{host}/"
+        }
+      ]
+    },
+    {
+      "id": "card_unknown",
+      "title": "Unknow_???",
+      "description": "建设中...🛠️\nBuilding...🛠️",
+      "links": [
+        {
+          "text": "建设中...🛠️",
+          "disabled": true
+        }
+      ]
+    }
+  ]
+}

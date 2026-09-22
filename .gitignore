@@ -1,0 +1,8 @@
+*.tmp
+*.temp
+*.bak
+*.log
+*.cache
+.cache/
+logs/
+*.pid
